@@ -1,9 +1,17 @@
 // log(currentPackage());
 // log(currentActivity());
-// toast("开始")
-
+toast("开始")
+var douyin144 = {
+    sy: "com.ss.android.ugc.aweme:id/i74", //首页
+    dq: "com.ss.android.ugc.aweme:id/bav",   //地区
+    srk: "com.ss.android.ugc.aweme:id/fy8",  //手机输入框
+    hqyzm: "com.ss.android.ugc.aweme:id/b3o", //获取验证码
+}
+var max_times = 60;
 var url = "http://list.rola-ip.site:8088/user_get_ip_list?token=Tq1EDt0H6GXCYABG1571542946664&qty=1&country=us&time=5&format=txt&protocol=socks5&filter=1";
 let ip_obj = getIP(url);
+let widget_obj = {};
+
 
 openVPN(ip_obj.ip,ip_obj.port)
 let conn = checkConn();
@@ -14,6 +22,39 @@ if (conn==200) {
     toast("无法连通，请换代理。");
 }
 
+
+//函数定义区
+
+//重置设备：还原、清理、改机
+function resetDevice()
+{
+    home()
+    launch("com.qq.test");
+    textContains('还原本机').waitFor();
+    click("还原本机")
+    sleep(3000)
+    if (textContains('还原成功').findOne()) {
+        click("清除数据");
+        sleep(3000)
+        if (textContains("清除完成").findOne()) {
+            click("改机");
+            sleep(3000)
+            if (textContains("生成联系人").findOne()) {
+                sleep(3000);
+                home();
+                toast("改机完成")
+            } else {
+                toast("改机失败...");
+            }
+        } else {
+            toast("清除数据失败...");
+        }
+    } else {
+        toast("还原失败...");
+    }
+}
+
+//打开抖音
 function startDY() {
     home();
     for (let i = 0; i < 5; i++) {
@@ -41,8 +82,9 @@ function startDY() {
     return false;
 }
 
-function regDY() {
-    for (let i = 0; i < i_max; i++) {
+//打开抖音的选择国家地区
+function gotoCountry() {
+    for (let i = 0; i < max_times; i++) {
         try {
             if (text('选择国家或地区').exists()) {
                 return;
@@ -53,6 +95,7 @@ function regDY() {
             } else if (text('以后再说').exists()) {
                 click('以后再说');
             } else {
+                click("")
                 // clickcontrolex(id(ugc.sy).text('我').findOne(500));
                 // clickcontrol(id(ugc.dq).findOne(100))
             };
@@ -63,6 +106,7 @@ function regDY() {
     };
 }
 
+//关闭VPN
 function closeVPN() {
     home();
     sleep(1000);
@@ -78,6 +122,8 @@ function closeVPN() {
         sleep(1000);
     }
 }
+
+//打开VPN
 function openVPN(ip,port) {
     log("进入设置VPN函数");
     home();
@@ -124,14 +170,15 @@ function openVPN(ip,port) {
     }
 }
 
+//检测当前网络连通性
 function checkConn() {
-    //检测当前网络连通性
     toast("检测连通性");
     let r = http.get("http://www.baidu.com");
     r = r.statusCode;
     return r;
 }
 
+//获取代理IP
 function getIP(url) {
     try {
         let obj = {};
@@ -151,6 +198,7 @@ function getIP(url) {
     }   
 }
 
+//重写get函数
 function http_get(url) {
     try {
         result = http.get(url);
@@ -161,6 +209,7 @@ function http_get(url) {
     }
 }
 
+//重写post函数
 function http_post() {
     var url = "https://login.taobao.com/member/login.jhtml";
     var username = "你的用户名";
@@ -177,30 +226,48 @@ function http_post() {
     }
 }
 
-function resetDevice()
-{
-    home()
-    launch("com.qq.test");
-    textContains('还原本机').waitFor();
-    click("还原本机")
-    sleep(3000)
-    if (textContains('还原成功').findOne()) {
-        click("清除数据");
-        sleep(3000)
-        if (textContains("清除完成").findOne()) {
-            click("改机");
-            sleep(3000)
-            if (textContains("生成联系人").findOne()) {
-                sleep(3000);
-                home();
-                toast("改机完成")
+//重写点击函数(按控件bounds范围随机press)
+function pressObjEx(obj) {
+    if (obj != null) {
+        try {
+            obj = obj.bounds();
+            if (obj.left > 0 && obj.right > 0 && obj.top > 0 && obj.bottom > 0) {
+                return press(random(obj.left, obj.right), random(obj.top, obj.bottom), random(50, 150));
             } else {
-                toast("改机失败...");
+                return false;
             }
-        } else {
-            toast("清除数据失败...");
+        } catch (error) {
+            log(error);
+            return false;
         }
-    } else {
-        toast("还原失败...");
     }
 }
+
+//重写点击函数(按控件bounds范围随机click)
+function clickObjEx(obj) {
+    if (obj != null) {
+        try {
+            obj = obj.bounds();
+            if (obj.left > 0 && obj.right > 0 && obj.top > 0 && obj.bottom > 0) {
+                return click(random(obj.left, obj.right), random(obj.top, obj.bottom), random(50, 150));
+            } else {
+                return false;
+            }
+        } catch (error) {
+            log(error);
+            return false;
+        }
+    }
+}
+
+//重写点击函数(直接点击)
+function clickObj(obj) {
+    if (obj != null) {
+        try {
+            return obj.click();
+        } catch (error) {
+            log(error);
+            return false;
+        };
+    };
+};
